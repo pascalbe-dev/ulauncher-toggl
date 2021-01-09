@@ -8,7 +8,7 @@ TODO: ADD DEMO GIF
 
 ## Features
 
-- view currently running time entry
+- view and stop currently running time entry
 
 ## Requirements
 
