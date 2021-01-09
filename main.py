@@ -1,3 +1,5 @@
+import time
+
 import requests
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Extension import Extension
@@ -26,7 +28,12 @@ class TogglExtension(Extension):
 
     def get_current_entry(self):
         response = self.make_api_get_request("time_entries/current")
-        return None if not response["data"] else response["data"]
+        entry = response["data"]
+        if not entry:
+            return None
+
+        self.enrich_current_duration(entry)
+        return entry
 
     def stop_entry(self, entry_id):
         response = self.make_api_put_request(f"time_entries/{entry_id}/stop")
@@ -46,6 +53,22 @@ class TogglExtension(Extension):
                                 auth=(self.token, "api_token")).json()
         return response
 
+    def enrich_current_duration(self, current_entry):
+        duration_attribute = current_entry["duration"]
+
+        if duration_attribute < 0:
+            current_time = int(time.time())
+            duration = current_time + duration_attribute
+        else:
+            duration = duration_attribute
+
+        if duration < 60:
+            current_entry["displayable_duration"] = f"{duration} seconds"
+        else:
+            duration_in_mins = round(duration / 60)
+            duration_extra_seconds = duration % 60
+            current_entry["displayable_duration"] = f"{duration_in_mins} minutes, {duration_extra_seconds} seconds"
+
 
 class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
@@ -64,7 +87,9 @@ class KeywordQueryEventListener(EventListener):
         else:
             stop_action = ExtensionCustomAction(
                 {"action": "stop", "entry_id": current_timer["id"]})
-            return [self.gen_result_item(current_timer["description"], "Select this item to stop it!", stop_action)]
+            duration = current_timer["displayable_duration"]
+            description = current_timer["description"]
+            return [self.gen_result_item(f"[{description}] Running for {duration}.", "Select this item to stop it!", stop_action)]
 
     def gen_result_item(self, name, description, action):
         action = action or HideWindowAction()
