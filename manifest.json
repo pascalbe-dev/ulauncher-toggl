@@ -11,6 +11,13 @@
             "name": "Toggl",
             "description": "Interact with your Toggl timer",
             "default_value": "to"
+        },
+        {
+            "id": "api_token",
+            "type": "input",
+            "name": "Toggl API token",
+            "description": "The API token provided by Toggl to access the Toggl API",
+            "default_value": ""
         }
     ]
 }

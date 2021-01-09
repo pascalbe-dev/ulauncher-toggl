@@ -8,7 +8,7 @@ TODO: ADD DEMO GIF
 
 ## Features
 
-TODO: ADD FEATURES
+- view currently running time entry
 
 ## Requirements
 
@@ -23,7 +23,7 @@ Open ulauncher preferences window -> extensions -> add extension and paste the f
 
 ## Usage
 
-TODO
+- Before usage you need to configure your Toggl API token in plugin preferences. Find your API token [here](https://track.toggl.com/profile).
 
 ## Local development
 
