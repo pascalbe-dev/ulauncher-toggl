@@ -1,3 +1,4 @@
+import logging
 import time
 
 import requests
@@ -12,6 +13,8 @@ from ulauncher.api.shared.event import (ItemEnterEvent, KeywordQueryEvent,
                                         PreferencesEvent,
                                         PreferencesUpdateEvent)
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+
+logger = logging.getLogger(__name__)
 
 
 class TogglExtension(Extension):
@@ -35,6 +38,27 @@ class TogglExtension(Extension):
         self.enrich_current_duration(entry)
         return entry
 
+    def get_previous_timers(self):
+        response = self.make_api_get_request("time_entries")
+        distinct_entries = []
+        for entry in response:
+            if not any(existing_entry["description"] == entry["description"] for existing_entry in distinct_entries):
+                distinct_entries.append(entry)
+
+        return distinct_entries
+
+    def start_entry(self, entry):
+        request_payload = {
+            "time_entry": {
+                "description": entry["description"],
+                "pid": entry["pid"],
+                "created_with": "ULauncher Toggl Extension"
+            }
+        }
+        response = self.make_api_post_request(
+            "time_entries/start", request_payload)
+        return response
+
     def stop_entry(self, entry_id):
         response = self.make_api_put_request(f"time_entries/{entry_id}/stop")
         return response
@@ -51,6 +75,14 @@ class TogglExtension(Extension):
         headers = {"Content-Type": "application/json"}
         response = requests.get(url, headers=headers,
                                 auth=(self.token, "api_token")).json()
+        return response
+
+    def make_api_post_request(self, sub_url, payload):
+        url = TogglExtension.base_url + sub_url
+        headers = {"Content-Type": "application/json"}
+        logger.debug(payload)
+        response = requests.post(url, json=payload, headers=headers,
+                                 auth=(self.token, "api_token")).json()
         return response
 
     def enrich_current_duration(self, current_entry):
@@ -75,7 +107,9 @@ class KeywordQueryEventListener(EventListener):
         query = event.get_argument() or ""
 
         results = []
-        if not query:
+        if query:
+            results = self.gen_latest_timers_results(query, extension)
+        else:
             results = self.gen_current_timer_results(extension)
 
         return RenderResultListAction(results)
@@ -83,13 +117,24 @@ class KeywordQueryEventListener(EventListener):
     def gen_current_timer_results(self, extension):
         current_timer = extension.get_current_entry()
         if not current_timer:
-            return [self.gen_result_item("No timer running", "You should start one!", None)]
-        else:
-            stop_action = ExtensionCustomAction(
-                {"action": "stop", "entry_id": current_timer["id"]})
-            duration = current_timer["displayable_duration"]
-            description = current_timer["description"]
-            return [self.gen_result_item(f"[{description}] Running for {duration}.", "Select this item to stop it!", stop_action)]
+            return [self.gen_result_item("No timer running", "Type to start timer.", None)]
+
+        stop_action = ExtensionCustomAction(
+            {"action": "stop", "entry_id": current_timer["id"]})
+        duration = current_timer["displayable_duration"]
+        description = current_timer["description"]
+        return [self.gen_result_item(f"{description} | {duration}.", "Select to stop. Type to start another.", stop_action)]
+
+    def gen_latest_timers_results(self, query, extension):
+        previous_timers = extension.get_previous_timers()
+        filtered_previous_timers = [
+            timer for timer in previous_timers if query.lower() in timer["description"].lower()]
+
+        if not filtered_previous_timers:
+            return [self.gen_result_item("No result found", "Nothing to do here right now.", None)]
+
+        return [self.gen_result_item(timer["description"], "Select to start.",
+                                     ExtensionCustomAction({"action": "start", "entry": timer})) for timer in filtered_previous_timers]
 
     def gen_result_item(self, name, description, action):
         action = action or HideWindowAction()
@@ -104,6 +149,9 @@ class ItemEnterEventListener(EventListener):
         if action == "stop":
             entry_id = event_data["entry_id"]
             extension.stop_entry(entry_id)
+        elif action == "start":
+            entry = event_data["entry"]
+            extension.start_entry(entry)
 
 
 class PreferencesEventListener(EventListener):
