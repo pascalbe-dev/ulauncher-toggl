@@ -42,7 +42,7 @@ class KeywordQueryEventListener(EventListener):
                 ])
 
             if event.get_argument() is not None:
-                new_time_entry_description = event.get_argument()
+                new_time_entry_description = str(event.get_argument())
                 start_new_entry_option = UlauncherOption(
                     title='Start time entry "%s"' % new_time_entry_description,
                     description='Hit enter to start this time entry.',
@@ -97,7 +97,7 @@ class ItemEnterEventListener(EventListener):
                     )
                 ])
             if isinstance(event.get_data(), NewTimeEntryCommand):
-                new_time_entry_description = event.get_data()
+                new_time_entry_description: str = event.get_data().description
                 extension.toggl_api.start_time_entry(new_time_entry_description)
 
                 return extension.ulauncher_api.output_options([
