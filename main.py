@@ -38,6 +38,16 @@ class KeywordQueryEventListener(EventListener):
                     )
                 ])
 
+            if event.get_argument() is not None:
+                new_time_entry_description = event.get_argument()
+                return extension.ulauncher_api.output_options([
+                    UlauncherOption(
+                        title='Start time entry "%s"' % new_time_entry_description,
+                        description='Hit enter to start this time entry.',
+                        action=ExtensionCustomAction(new_time_entry_description, keep_app_open=True)
+                    )
+                ])
+
             current_time_entry = extension.toggl_api.get_current_time_entry()
 
             if current_time_entry is None:
@@ -73,6 +83,17 @@ class ItemEnterEventListener(EventListener):
                 return extension.ulauncher_api.output_options([
                     UlauncherOption(
                         title='Stopped time entry "%s"' % time_entry.description,
+                        description='Press enter to dismiss',
+                        action=HideWindowAction()
+                    )
+                ])
+            if isinstance(event.get_data(), str):
+                new_time_entry_description = event.get_data()
+                extension.toggl_api.start_time_entry(new_time_entry_description)
+
+                return extension.ulauncher_api.output_options([
+                    UlauncherOption(
+                        title='Started time entry "%s"' % new_time_entry_description,
                         description='Press enter to dismiss',
                         action=HideWindowAction()
                     )

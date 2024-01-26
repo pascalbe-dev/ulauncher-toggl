@@ -31,8 +31,8 @@ class TogglApi:
             raise Exception("Could not stop time entry: " + response.text)
 
     def start_time_entry(self, description: str) -> None:
-        workspace_id = "2719602"
-        response = requests.post(self.base_url + "workspaces/" + workspace_id + "/time_entries/start", auth=(self.token, "api_token"), json={
+        workspace_id = 2719602
+        response = requests.post(self.base_url + "workspaces/" + str(workspace_id) + "/time_entries", auth=(self.token, "api_token"), json={
             "workspace_id": workspace_id,
             "description": description,
             "created_with": "ulauncher-toggl",
