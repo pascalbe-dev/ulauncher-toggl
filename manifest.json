@@ -1,23 +1,23 @@
 {
-    "required_api_version": "^2.0.0",
-    "name": "Toggl",
-    "description": "Interact with your Toggl timer",
-    "developer_name": "Pascal Betting",
-    "icon": "images/icon.png",
-    "preferences": [
-        {
-            "id": "to",
-            "type": "keyword",
-            "name": "Toggl",
-            "description": "Interact with your Toggl timer",
-            "default_value": "to"
-        },
-        {
-            "id": "api_token",
-            "type": "input",
-            "name": "Toggl API token",
-            "description": "The API token provided by Toggl to access the Toggl API",
-            "default_value": ""
-        }
-    ]
+  "required_api_version": "^2.0.0",
+  "name": "Toggl",
+  "description": "Interact with your Toggl timer",
+  "developer_name": "Pascal Betting",
+  "icon": "images/icon.png",
+  "preferences": [
+    {
+      "id": "keyword",
+      "type": "keyword",
+      "name": "Toggl extension keyword",
+      "description": "The keyword to start the Toggl extension",
+      "default_value": "to"
+    },
+    {
+      "id": "api_token",
+      "type": "input",
+      "name": "Toggl API token",
+      "description": "The API token provided by Toggl to access the Toggl API. Find it here: https://track.toggl.com/profile#api-token-label",
+      "default_value": ""
+    }
+  ]
 }
