@@ -54,13 +54,13 @@ class KeywordQueryEventListener(EventListener):
                 return extension.ulauncher_api.output_options([
                     UlauncherOption(
                         title='No current time entry',
-                        description='Click this item to start a new time entry.',
+                        description='Start writing to start a new time entry.',
                     )
                 ])
             return extension.ulauncher_api.output_options([
                 UlauncherOption(
                     title='Current time entry "%s"' % current_time_entry.description,
-                    description='Click this item to stop the current time entry.',
+                    description='Click this item to stop the current time entry or start writing to start another one.',
                     action=ExtensionCustomAction(current_time_entry, keep_app_open=True)
                 )
             ])
@@ -83,7 +83,7 @@ class ItemEnterEventListener(EventListener):
                 return extension.ulauncher_api.output_options([
                     UlauncherOption(
                         title='Stopped time entry "%s"' % time_entry.description,
-                        description='Press enter to dismiss',
+                        description='Press enter to dismiss or start writing to start a new time entry.',
                         action=HideWindowAction()
                     )
                 ])
