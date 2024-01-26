@@ -32,11 +32,14 @@ class TogglApi:
 
     def start_time_entry(self, description: str) -> None:
         workspace_id = 2719602
+        creator = "ulauncher-toggl"
         response = requests.post(self.base_url + "workspaces/" + str(workspace_id) + "/time_entries", auth=(self.token, "api_token"), json={
             "workspace_id": workspace_id,
             "description": description,
-            "created_with": "ulauncher-toggl",
-            "start": datetime.now(timezone.utc).isoformat()
+            "created_with": creator,
+            "start": datetime.now(timezone.utc).isoformat(),
+            "duration": -1,
+            "tags": ["by:" + creator]
         })
         if response.status_code != 200:
             raise Exception("Could not start time entry: " + response.text)
