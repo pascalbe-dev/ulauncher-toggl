@@ -2,9 +2,9 @@
 
 > [ulauncher](https://ulauncher.io/) Extension to access your [Toggl](https://track.toggl.com/timer) timer.
 
-## Usage
+## Demo
 
-TODO: ADD DEMO GIF
+https://github.com/pascalbe-dev/ulauncher-toggl/assets/26909176/0c39b4cc-45af-4ebc-ad8d-526055d97746
 
 ## Features
 
