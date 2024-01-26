@@ -1,36 +1,40 @@
+from typing import List
 import requests
 from datetime import datetime, timezone
 
 from src.time_entry import TimeEntry
+from src.project import Project
 
 class TogglApi:
     token = None
     base_url = "https://api.track.toggl.com/api/v9/"
 
+    workspace_id: int = None
+    projects: List[Project] = []
+    recent_time_entries: List[TimeEntry] = []
+
     def set_token(self, token):
         self.token = token
+        self.get_and_store_user_details()
 
     def has_token_set(self):
         return self.token != None and len(self.token) > 31
 
-    def get_workspace_id(self) -> int:
-        response = requests.get(self.base_url + "me", auth=(self.token, "api_token"))
+    def get_and_store_user_details(self):
+        response = requests.get(self.base_url + "me?with_related_data=true", auth=(self.token, "api_token"))
         if response.status_code != 200:
-            raise Exception("Could not get workspace id: " + response.text)
+            raise Exception("Could not get data from Toggl: " + response.status_code)
 
-        return response.json()["default_workspace_id"]
+        self.workspace_id = response.json()["default_workspace_id"]
+        self.projects = [Project(project) for project in response.json()["projects"]]
+        self.recent_time_entries = [TimeEntry(time_entry) for time_entry in response.json()["time_entries"]]
+
+    def get_workspace_id(self) -> int:
+        return self.workspace_id
 
     def get_current_time_entry(self) -> TimeEntry:
-        response = requests.get(self.base_url + "me/time_entries", auth=(self.token, "api_token"))
-        if response.status_code != 200:
-            raise Exception("Could not get current time entry: " + response.text)
-
-        time_entry_dtos = response.json()
-        if len(time_entry_dtos) == 0:
-            return None
-
-        time_entries = [TimeEntry(time_entry) for time_entry in time_entry_dtos]
-        return next((time_entry for time_entry in time_entries if time_entry.is_running), None)
+        self.get_and_store_user_details()
+        return next((time_entry for time_entry in self.recent_time_entries if time_entry.is_running), None)
 
     def stop_time_entry(self, time_entry: TimeEntry) -> None:
         response = requests.patch(self.base_url + "workspaces/" + str(time_entry.workspace_id) + "/time_entries/" + str(time_entry.id) + "/stop", auth=(self.token, "api_token"))
