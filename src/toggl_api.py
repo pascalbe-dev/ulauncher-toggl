@@ -27,7 +27,7 @@ class TogglApi:
 
         self.workspace_id = response.json()["default_workspace_id"]
         self.projects = [Project(project) for project in response.json()["projects"]]
-        self.recent_time_entries = [TimeEntry(time_entry) for time_entry in response.json()["time_entries"]]
+        self.recent_time_entries = [TimeEntry(time_entry).enrich_project(self.projects) for time_entry in response.json()["time_entries"]]
 
     def get_workspace_id(self) -> int:
         return self.workspace_id
