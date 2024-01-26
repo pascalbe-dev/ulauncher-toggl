@@ -8,7 +8,8 @@ TODO: ADD DEMO GIF
 
 ## Features
 
-- view and stop currently running time entry
+- view the current time entry
+- stop the current time entry
 
 ## Requirements
 
@@ -23,7 +24,7 @@ Open ulauncher preferences window -> extensions -> add extension and paste the f
 
 ## Usage
 
-- Before usage you need to configure your Toggl API token in plugin preferences. Find your API token [here](https://track.toggl.com/profile).
+- Before usage you need to configure your Toggl API token in plugin preferences. Find your API token [here](https://track.toggl.com/profile#api-token-label).
 
 ## Local development
 
@@ -32,7 +33,7 @@ Open ulauncher preferences window -> extensions -> add extension and paste the f
 - `less` package installed
 - `inotify-tools` package installed
 
-### Steps 
+### Steps
 
 1. Clone the repo `git clone https://github.com/pascalbe-dev/ulauncher-toggl.git`
 2. Cd into the folder `cd ulauncher-toggl`

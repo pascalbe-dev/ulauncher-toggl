@@ -1,5 +1,6 @@
 import logging
 from src.toggl_api import TogglApi
+from src.time_entry import TimeEntry
 
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Extension import Extension
@@ -53,7 +54,7 @@ class KeywordQueryEventListener(EventListener):
                 ExtensionResultItem(icon='images/icon.png',
                                     name='Entry "%s" running' % current_time_entry.description,
                                     description='Click this item to stop the current time entry.',
-                                    on_enter=ExtensionCustomAction(event.get_argument(), keep_app_open=False))
+                                    on_enter=ExtensionCustomAction(current_time_entry, keep_app_open=True))
             ])
         except Exception as e:
             logger.error(e)
@@ -64,8 +65,25 @@ class KeywordQueryEventListener(EventListener):
             ])
 
 class ItemEnterEventListener(EventListener):
-    def on_event(self, event, extension):
-        pass
+    def on_event(self, event, extension: TogglExtension):
+        try:
+            if isinstance(event.get_data(), TimeEntry):
+                time_entry = event.get_data()
+                extension.toggl_api.stop_time_entry(time_entry)
+                message = 'Stopped time entry "%s"' % time_entry.description
+                return RenderResultListAction([
+                    ExtensionResultItem(icon='images/icon.png',
+                                        name=message,
+                                        description='Press enter to dismiss',
+                                        on_enter=HideWindowAction()
+                )])
+        except Exception as e:
+            logger.error(e)
+            return RenderResultListAction([
+                ExtensionResultItem(icon='images/icon.png',
+                                    name='Error in handling the action.',
+                                    description=str(e))
+            ])
 
 class PreferencesEventListener(EventListener):
     def on_event(self, event, extension):

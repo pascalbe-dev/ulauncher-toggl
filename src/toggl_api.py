@@ -24,6 +24,6 @@ class TogglApi:
         return next((time_entry for time_entry in time_entries if time_entry.is_running), None)
 
     def stop_time_entry(self, time_entry: TimeEntry) -> None:
-        response = requests.put(self.base_url + "workspaces/" + str(time_entry.workspace_id) + "/time_entries/" + str(time_entry.id) + "/stop", auth=(self.token, "api_token"))
+        response = requests.patch(self.base_url + "workspaces/" + str(time_entry.workspace_id) + "/time_entries/" + str(time_entry.id) + "/stop", auth=(self.token, "api_token"))
         if response.status_code != 200:
             raise Exception("Could not stop time entry: " + response.text)
