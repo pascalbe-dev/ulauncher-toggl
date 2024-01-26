@@ -45,14 +45,14 @@ class KeywordQueryEventListener(EventListener):
                 new_time_entry_description = str(event.get_argument())
                 start_new_entry_option = UlauncherOption(
                     title='Start time entry "%s"' % new_time_entry_description,
-                    description='Hit enter to start this time entry.',
+                    description='Select this to start this time entry.',
                     action=ExtensionCustomAction(NewTimeEntryCommand(new_time_entry_description), keep_app_open=True)
                 )
                 recent_time_entries = extension.toggl_api.get_recent_time_entries(new_time_entry_description)
                 return extension.ulauncher_api.output_options([start_new_entry_option] + [
                     UlauncherOption(
                         title='Restart "%s"' % str(time_entry),
-                        description='Hit enter to restart this time entry.',
+                        description='Select this to restart this time entry.',
                         action=ExtensionCustomAction(RestartTimeEntryCommand(time_entry), keep_app_open=True)
                     ) for time_entry in recent_time_entries
                 ])
@@ -69,7 +69,7 @@ class KeywordQueryEventListener(EventListener):
             return extension.ulauncher_api.output_options([
                 UlauncherOption(
                     title='Current "%s"' % str(current_time_entry),
-                    description='Click this item to stop the current time entry or start writing to start another one.',
+                    description='Select this to stop the entry or start writing to start a new one.',
                     action=ExtensionCustomAction(StopTimeEntryCommand(current_time_entry), keep_app_open=True)
                 )
             ])
