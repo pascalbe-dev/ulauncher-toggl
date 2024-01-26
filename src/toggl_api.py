@@ -16,12 +16,10 @@ class TogglApi:
         if response.status_code != 200:
             raise Exception("Could not get current time entry: " + response.text)
 
-        time_entries = response.json()
-        if len(time_entries) == 0:
+        time_entry_dtos = response.json()
+        if len(time_entry_dtos) == 0:
             return None
 
-        if not any(time_entry["stop"] == None for time_entry in time_entries):
-            return None
-
-        return TimeEntry(time_entries[0]["description"])
+        time_entries = [TimeEntry(time_entry) for time_entry in time_entry_dtos]
+        return next((time_entry for time_entry in time_entries if time_entry.is_running), None)
 
