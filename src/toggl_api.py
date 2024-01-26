@@ -1,4 +1,6 @@
 import requests
+from datetime import datetime, timezone
+
 from src.time_entry import TimeEntry
 
 class TogglApi:
@@ -27,3 +29,14 @@ class TogglApi:
         response = requests.patch(self.base_url + "workspaces/" + str(time_entry.workspace_id) + "/time_entries/" + str(time_entry.id) + "/stop", auth=(self.token, "api_token"))
         if response.status_code != 200:
             raise Exception("Could not stop time entry: " + response.text)
+
+    def start_time_entry(self, description: str) -> None:
+        workspace_id = "2719602"
+        response = requests.post(self.base_url + "workspaces/" + workspace_id + "/time_entries/start", auth=(self.token, "api_token"), json={
+            "workspace_id": workspace_id,
+            "description": description,
+            "created_with": "ulauncher-toggl",
+            "start": datetime.now(timezone.utc).isoformat()
+        })
+        if response.status_code != 200:
+            raise Exception("Could not start time entry: " + response.text)
