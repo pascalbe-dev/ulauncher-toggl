@@ -53,3 +53,6 @@ class TogglApi:
         })
         if response.status_code != 200:
             raise Exception("Could not start time entry: " + response.text)
+
+    def get_recent_time_entries(self, filter: str = "") -> List[TimeEntry]:
+        return [time_entry for time_entry in self.recent_time_entries if not time_entry.is_running and filter.lower() in time_entry.description.lower()]
