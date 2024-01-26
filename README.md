@@ -11,6 +11,7 @@ TODO: ADD DEMO GIF
 - view the current time entry
 - stop the current time entry
 - start a new time entry (without project)
+- restart a time entry from your history
 
 ## Requirements
 

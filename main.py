@@ -4,6 +4,9 @@ from src.toggl_api import TogglApi
 from src.time_entry import TimeEntry
 from src.ulauncher_api import UlauncherApi
 from src.ulauncher_option import UlauncherOption
+from src.new_time_entry_command import NewTimeEntryCommand
+from src.restart_time_entry_command import RestartTimeEntryCommand
+from src.stop_time_entry_command import StopTimeEntryCommand
 
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Extension import Extension
@@ -40,12 +43,18 @@ class KeywordQueryEventListener(EventListener):
 
             if event.get_argument() is not None:
                 new_time_entry_description = event.get_argument()
-                return extension.ulauncher_api.output_options([
+                start_new_entry_option = UlauncherOption(
+                    title='Start time entry "%s"' % new_time_entry_description,
+                    description='Hit enter to start this time entry.',
+                    action=ExtensionCustomAction(NewTimeEntryCommand(new_time_entry_description), keep_app_open=True)
+                )
+                recent_time_entries = extension.toggl_api.get_recent_time_entries(new_time_entry_description)
+                return extension.ulauncher_api.output_options([start_new_entry_option] + [
                     UlauncherOption(
-                        title='Start time entry "%s"' % new_time_entry_description,
-                        description='Hit enter to start this time entry.',
-                        action=ExtensionCustomAction(new_time_entry_description, keep_app_open=True)
-                    )
+                        title='Restart "%s"' % str(time_entry),
+                        description='Hit enter to restart this time entry.',
+                        action=ExtensionCustomAction(RestartTimeEntryCommand(time_entry), keep_app_open=True)
+                    ) for time_entry in recent_time_entries
                 ])
 
             current_time_entry = extension.toggl_api.get_current_time_entry()
@@ -61,7 +70,7 @@ class KeywordQueryEventListener(EventListener):
                 UlauncherOption(
                     title='Current "%s"' % str(current_time_entry),
                     description='Click this item to stop the current time entry or start writing to start another one.',
-                    action=ExtensionCustomAction(current_time_entry, keep_app_open=True)
+                    action=ExtensionCustomAction(StopTimeEntryCommand(current_time_entry), keep_app_open=True)
                 )
             ])
         except Exception as e:
@@ -76,8 +85,8 @@ class KeywordQueryEventListener(EventListener):
 class ItemEnterEventListener(EventListener):
     def on_event(self, event, extension: TogglExtension):
         try:
-            if isinstance(event.get_data(), TimeEntry):
-                time_entry = event.get_data()
+            if isinstance(event.get_data(), StopTimeEntryCommand):
+                time_entry: TimeEntry = event.get_data().time_entry
                 extension.toggl_api.stop_time_entry(time_entry)
 
                 return extension.ulauncher_api.output_options([
@@ -87,13 +96,24 @@ class ItemEnterEventListener(EventListener):
                         action=HideWindowAction()
                     )
                 ])
-            if isinstance(event.get_data(), str):
+            if isinstance(event.get_data(), NewTimeEntryCommand):
                 new_time_entry_description = event.get_data()
                 extension.toggl_api.start_time_entry(new_time_entry_description)
 
                 return extension.ulauncher_api.output_options([
                     UlauncherOption(
                         title='Started time entry "%s"' % new_time_entry_description,
+                        description='Press enter to dismiss',
+                        action=HideWindowAction()
+                    )
+                ])
+            if isinstance(event.get_data(), RestartTimeEntryCommand):
+                time_entry: TimeEntry = event.get_data().time_entry
+                extension.toggl_api.restart_time_entry(time_entry)
+
+                return extension.ulauncher_api.output_options([
+                    UlauncherOption(
+                        title='Restarted "%s"' % str(time_entry),
                         description='Press enter to dismiss',
                         action=HideWindowAction()
                     )

@@ -41,10 +41,11 @@ class TogglApi:
         if response.status_code != 200:
             raise Exception("Could not stop time entry: " + response.text)
 
-    def start_time_entry(self, description: str) -> None:
+    def start_time_entry(self, description: str, project_id: int = None) -> None:
         workspace_id = self.get_workspace_id()
         response = requests.post(self.base_url + "workspaces/" + str(workspace_id) + "/time_entries", auth=(self.token, "api_token"), json={
             "workspace_id": workspace_id,
+            "project_id": project_id or None,
             "description": description,
             "created_with": "ulauncher-toggl",
             "start": datetime.now(timezone.utc).isoformat(),
@@ -55,4 +56,9 @@ class TogglApi:
             raise Exception("Could not start time entry: " + response.text)
 
     def get_recent_time_entries(self, filter: str = "") -> List[TimeEntry]:
-        return [time_entry for time_entry in self.recent_time_entries if not time_entry.is_running and filter.lower() in time_entry.description.lower()]
+        return set([time_entry for time_entry in self.recent_time_entries if not time_entry.is_running and filter.lower() in time_entry.description.lower()])
+
+    def restart_time_entry(self, time_entry: TimeEntry) -> None:
+        self.start_time_entry(time_entry.description, time_entry.project_id)
+
+

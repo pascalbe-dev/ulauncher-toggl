@@ -23,6 +23,12 @@ class TimeEntry:
         prefix = "[" + self.project.name + "] " if self.project else ""
         return prefix + self.description
 
+    def __eq__(self, __value: object) -> bool:
+        return isinstance(__value, TimeEntry) and str(self) == str(__value)
+
+    def __hash__(self) -> int:
+        return hash(str(self))
+
     def enrich_project(self, all_projects: List[Project]) -> TimeEntry:
         project = next((project for project in all_projects if project.id == self.project_id), None)
         self.project = project or None
