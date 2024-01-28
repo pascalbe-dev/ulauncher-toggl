@@ -18,15 +18,19 @@ https://github.com/pascalbe-dev/ulauncher-toggl/assets/26909176/0c39b4cc-45af-4e
 - [ulauncher 5](https://ulauncher.io/)
 - Python > 3
 
-## Install
+## Installation
 
 Open ulauncher preferences window -> extensions -> add extension and paste the following url:
 
 `https://github.com/pascalbe-dev/ulauncher-toggl.git`
 
-## Usage
+## Configuration
 
 - Before usage you need to configure your Toggl API token in plugin preferences. Find your API token [here](https://track.toggl.com/profile#api-token-label).
+
+## Contribution
+
+Please refer to [the contribution guidelines](./CONTRIBUTING.md)
 
 ## Local development
 
