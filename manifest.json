@@ -8,7 +8,7 @@
     {
       "id": "keyword",
       "type": "keyword",
-      "name": "Toggl extension keyword",
+      "name": "Toggl extension",
       "description": "The keyword to start the Toggl extension",
       "default_value": "to"
     },
